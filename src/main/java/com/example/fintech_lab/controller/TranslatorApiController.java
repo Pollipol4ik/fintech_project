@@ -16,10 +16,8 @@ public class TranslatorApiController {
     private final RestTemplate restTemplate;
 
     public String translateWord(YandexRequest translateApiRequest) {
-        String urlEndpoint = "/translate";
-
-        //TODO
         try {
+            String urlEndpoint = "/translate";
             ResponseEntity<YandexResponse> response = restTemplate.postForEntity(
                     urlEndpoint,
                     translateApiRequest,
