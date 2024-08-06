@@ -1,0 +1,23 @@
+springdoc:
+  swagger-ui:
+    path: /swagger-ui
+
+spring:
+  liquibase:
+    enabled: false
+  mvc:
+    servlet:
+      path: /api/v1
+
+  datasource:
+    url: jdbc:postgresql://localhost:15432/translator
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+client:
+  yandex:
+    base-url: https://translate.api.cloud.yandex.net/translate/v2/
+    api-key: ${API_KEY:}
+    folder-id: ${FOLDER_ID:}
+
