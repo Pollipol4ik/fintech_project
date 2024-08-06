@@ -10,13 +10,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.concurrent.Semaphore;
+
 @Component
 @RequiredArgsConstructor
 public class TranslatorApiController {
     private final RestTemplate restTemplate;
+    private final Semaphore semaphore = new Semaphore(10, true);
 
-    public String translateWord(YandexRequest translateApiRequest) {
+    public String translateWord(YandexRequest translateApiRequest) throws InterruptedException {
         try {
+            semaphore.acquire();
             String urlEndpoint = "/translate";
             ResponseEntity<YandexResponse> response = restTemplate.postForEntity(
                     urlEndpoint,
@@ -30,6 +34,9 @@ public class TranslatorApiController {
             }
         } catch (Exception e) {
             throw new AccessResourceException("Ошибка доступа к ресурсу перевода");
+        } finally {
+            Thread.sleep(500);
+            semaphore.release();
         }
     }
 

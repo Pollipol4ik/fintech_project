@@ -47,10 +47,12 @@ public class TranslationService {
         String[] listWords = translationRequest.sourceText().split(" ");
         List<Future<String>> futures = new ArrayList<>();
         for (String text : listWords) {
-            futures.add(executorService.submit(() -> {
-                YandexRequest request = new YandexRequest(folderId, List.of(text), translationRequest.targetLanguageCode(), translationRequest.sourceLanguageCode());
-                return translatorApiController.translateWord(request);
-            }));
+            if (!text.trim().isEmpty()) {
+                futures.add(executorService.submit(() -> {
+                    YandexRequest request = new YandexRequest(folderId, List.of(text), translationRequest.targetLanguageCode(), translationRequest.sourceLanguageCode());
+                    return translatorApiController.translateWord(request);
+                }));
+            }
         }
 
         StringBuilder translatedText = new StringBuilder();
