@@ -25,7 +25,7 @@ public class TranslationRepositoryTest  extends IntegrationEnvironment {
     @Test
     @Transactional
     @Rollback
-    public void save_shouldInsertNewTranslationRequest_whenIpNotExists() {
+    public void saveShouldInsertNewTranslationRequest_whenIpNotExists() {
         // Arrange
         String ipAddress = "192.168.0.1";
         String inputText = "Hello";

@@ -17,17 +17,20 @@ public class TranslatorApiController {
 
     public String translateWord(YandexRequest translateApiRequest) {
         String urlEndpoint = "/translate";
+
         //TODO
-        ResponseEntity<YandexResponse> response = restTemplate.postForEntity(
-                urlEndpoint,
-                translateApiRequest,
-                YandexResponse.class
-        );
-        if (response.getStatusCode().is2xxSuccessful() &&
-                response.getBody() != null &&
-                !response.getBody().translations().isEmpty()) {
-            return response.getBody().translations().get(0).text();
-        } else {
+        try {
+            ResponseEntity<YandexResponse> response = restTemplate.postForEntity(
+                    urlEndpoint,
+                    translateApiRequest,
+                    YandexResponse.class
+            );
+            if (response.getBody() != null && !response.getBody().translations().isEmpty()) {
+                return response.getBody().translations().get(0).text();
+            } else {
+                throw new AccessResourceException("Ошибка доступа к ресурсу перевода");
+            }
+        } catch (Exception e) {
             throw new AccessResourceException("Ошибка доступа к ресурсу перевода");
         }
     }

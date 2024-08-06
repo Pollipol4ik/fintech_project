@@ -5,6 +5,7 @@ import com.example.fintech_lab.dto.translation.TranslationRequest;
 import com.example.fintech_lab.dto.yandex.GetAllLanguagesRequest;
 import com.example.fintech_lab.dto.yandex.YandexRequest;
 import com.example.fintech_lab.entity.TranslationTextEntity;
+import com.example.fintech_lab.exceptions.FutureException;
 import com.example.fintech_lab.exceptions.LanguageNotFoundException;
 import com.example.fintech_lab.repository.TranslationRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,8 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -33,7 +32,8 @@ public class TranslationService {
     private final TranslatorApiController translatorApiController;
     private final ExecutorService executorService = Executors.newFixedThreadPool(10);
 
-    public String translateText(TranslationRequest translationRequest) throws InterruptedException, ExecutionException, UnknownHostException {
+    @Transactional
+    public String translateText(TranslationRequest translationRequest, String ip) {
         if (languages.isEmpty()) {
             getLanguages();
         }
@@ -55,26 +55,19 @@ public class TranslationService {
 
         StringBuilder translatedText = new StringBuilder();
         for (Future<String> future : futures) {
-            translatedText.append(future.get()).append(" ");
+            try {
+                translatedText.append(future.get()).append(" ");
+            } catch (InterruptedException | ExecutionException e) {
+                throw new FutureException("Возникла проблема при параллельной работе сервера.");
+            }
         }
-
         String result = translatedText.toString().trim();
-        saveTranslationToDatabase(translationRequest.sourceText(), result);
-
+        saveTranslationToDatabase(ip, translationRequest.sourceText(), result);
         return result;
     }
 
-//    @Transactional
-//    public void saveTranslationToDatabase(String sourceText, String translatedText) throws UnknownHostException {
-////        WebAuthenticationDetails details = (WebAuthenticationDetails)SecurityContextHolder.getContext().getAuthentication().getDetails();
-////        String ip = details.getRemoteAddress();
-//        TranslationTextEntity entity = new TranslationTextEntity(InetAddress.getLocalHost().getHostAddress(), sourceText, translatedText);
-//        translationRepository.save(entity);
-//    }
-
     @Transactional
-    public void saveTranslationToDatabase(String sourceText, String translatedText) throws UnknownHostException {
-        String ip = InetAddress.getLocalHost().getHostAddress();
+    public void saveTranslationToDatabase(String ip, String sourceText, String translatedText) {
         TranslationTextEntity entity = new TranslationTextEntity(ip, sourceText, translatedText);
         translationRepository.save(entity);
     }

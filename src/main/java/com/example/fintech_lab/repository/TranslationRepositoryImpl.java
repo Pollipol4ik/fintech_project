@@ -18,12 +18,10 @@ public class TranslationRepositoryImpl implements TranslationRepository {
 
         Long ipId;
         if (ipIdOptional.isEmpty()) {
-            jdbcClient.sql("INSERT INTO ip_address (ip_address) VALUES (:ip)")
+            ipId = jdbcClient.sql("INSERT INTO ip_address (ip_address) VALUES (:ip) RETURNING id")
                     .param("ip", entity.ipAddress())
-                    .update();
-
-            ipId = findIpId(entity.ipAddress())
-                    .orElseThrow(() -> new IllegalStateException("Failed to retrieve IP ID after insert"));
+                    .query(Long.class)
+                    .single();
         } else {
             ipId = ipIdOptional.get();
         }
@@ -37,6 +35,6 @@ public class TranslationRepositoryImpl implements TranslationRepository {
         return jdbcClient.sql("SELECT id FROM ip_address WHERE ip_address = :ip")
                 .param("ip", ipAddress)
                 .query((rs, rowNum) -> rs.getLong("id"))
-                .optional(); // Используем optional() для возвращения Optional<Long>
+                .optional();
     }
 }

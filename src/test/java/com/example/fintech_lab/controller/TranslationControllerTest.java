@@ -11,9 +11,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.net.UnknownHostException;
-import java.util.concurrent.ExecutionException;
-
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -37,7 +34,8 @@ public class TranslationControllerTest {
         TranslationRequest request = new TranslationRequest("en", "ru", "Hello world");
         String translatedText = "Привет, мир";
 
-        Mockito.when(translationService.translateText(request)).thenReturn(translatedText);
+        Mockito.when(translationService.translateText(Mockito.any(TranslationRequest.class), Mockito.anyString()))
+                .thenReturn(translatedText);
 
         mockMvc.perform(post("/translate")
                         .contentType("application/json")
@@ -46,47 +44,6 @@ public class TranslationControllerTest {
                 .andExpect(jsonPath("$.translatedText", is(translatedText)));
     }
 
-//    @Test
-//    @DisplayName("Translate text - ExecutionException")
-//    public void translateTextExecutionException() throws Exception {
-//        TranslationRequest request = new TranslationRequest("en", "ru", "Hello world");
-//
-//        Mockito.when(translationService.translateText(request))
-//                .thenThrow(new ExecutionException("Execution exception", new Throwable()));
-//
-//        mockMvc.perform(post("/translate")
-//                        .contentType("application/json")
-//                        .content(objectMapper.writeValueAsString(request)))
-//                .andExpect(status().isInternalServerError());
-//    }
-//
-//    @Test
-//    @DisplayName("Translate text - InterruptedException")
-//    public void translateTextInterruptedException() throws Exception {
-//        TranslationRequest request = new TranslationRequest("en", "ru", "Hello world");
-//
-//        Mockito.when(translationService.translateText(request))
-//                .thenThrow(new InterruptedException("Interrupted exception"));
-//
-//        mockMvc.perform(post("/translate")
-//                        .contentType("application/json")
-//                        .content(objectMapper.writeValueAsString(request)))
-//                .andExpect(status().isInternalServerError());
-//    }
-//
-//    @Test
-//    @DisplayName("Translate text - UnknownHostException")
-//    public void translateTextUnknownHostException() throws Exception {
-//        TranslationRequest request = new TranslationRequest("en", "ru", "Hello world");
-//
-//        Mockito.when(translationService.translateText(request))
-//                .thenThrow(new UnknownHostException("Unknown host exception"));
-//
-//        mockMvc.perform(post("/translate")
-//                        .contentType("application/json")
-//                        .content(objectMapper.writeValueAsString(request)))
-//                .andExpect(status().isInternalServerError());
-//    }
 
     @Test
     @DisplayName("Translate text - Empty Source Language Code")
